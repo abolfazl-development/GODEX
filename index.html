@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="lenis lenis-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <title>GODEX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=no" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Vazirmatn', 'sans-serif'],
+            },
+            colors: {
+              // Semantic color abstraction can go here if needed
+            },
+            transitionTimingFunction: {
+              // The "Apple" Curve: Fast response, very smooth, long settling time.
+              'apple': 'cubic-bezier(0.19, 1, 0.22, 1)', 
+              'fluid': 'cubic-bezier(0.32, 0.72, 0, 1)',
+              'press': 'cubic-bezier(0.4, 0, 0.2, 1)', 
+              'soft': 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+            },
+            transitionDuration: {
+              '200': '200ms', 
+              '250': '250ms', 
+              '400': '400ms', 
+              '600': '600ms', 
+              '800': '800ms', 
+              '1000': '1000ms',
+            },
+            backgroundImage: {
+              'glass-gradient-light': 'linear-gradient(to bottom, rgba(255,255,255,0.85), rgba(255,255,255,0.5))',
+              'glass-gradient-dark': 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.4))',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { 
+                  opacity: '0', 
+                  /* Reduced distance and scale for snappier feel */
+                  transform: 'translate3d(0, 30px, 0) scale(0.98)', 
+                  /* Reduced blur for cleaner motion */
+                  filter: 'blur(4px)', 
+                },
+                '100%': { 
+                  opacity: '1', 
+                  transform: 'translate3d(0, 0, 0) scale(1)',
+                  filter: 'blur(0px)', 
+                },
+              },
+              float: {
+                '0%, 100%': { transform: 'translate3d(0, 0, 0)' },
+                '50%': { transform: 'translate3d(0, -10px, 0)' },
+              }
+            },
+            animation: {
+              /* Sped up from 0.8s to 0.6s */
+              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'float': 'float 6s ease-in-out infinite',
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+      /* --- GLOBAL RESET & PHYSICS --- */
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+      
+      html, body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        overscroll-behavior-y: none; /* Prevents rubber-banding that fights Lenis */
+      }
+
+      body {
+        font-family: 'Vazirmatn', sans-serif;
+        background-color: #f8fafc; 
+      }
+      
+      * {
+        box-sizing: border-box;
+      }
+
+      /* --- LENIS & SCROLLBAR --- */
+      html.lenis, html.lenis body { height: auto; }
+      .lenis.lenis-smooth { scroll-behavior: auto !important; }
+      .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+      .lenis.lenis-stopped { overflow: hidden; }
+      .lenis.lenis-scrolling iframe { pointer-events: none; }
+
+      ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+      html.dark body { background-color: #020617; }
+      
+      /* --- OPTIMIZED LAYERS --- */
+      .gpu-layer {
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+        will-change: transform, opacity;
+      }
+
+      .fixed-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        transform: translateZ(0);
+      }
+
+      /* --- CENTRALIZED ANIMATION PHYSICS --- */
+      /* Defines the standard interactive feel for buttons/links */
+      .physics-interactive {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1); 
+        transition-duration: 700ms;
+        transform: translateZ(0);
+      }
+      
+      .physics-interactive:active {
+        /* transform: scale(0.92); REMOVED CLICK ANIMATION */
+        /* transition-duration: 250ms; */
+      }
+
+      /* Defines the standard card feel - ULTRA SMOOTH */
+      .card-interactive {
+        transition-property: transform, box-shadow, background-color, border-color, opacity;
+        transition-duration: 1000ms; 
+        transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+        transform: translateZ(0);
+        will-change: transform;
+        backface-visibility: hidden;
+      }
+
+      .card-interactive:hover {
+        transform: scale(1.025) translateY(-8px);
+        z-index: 10;
+      }
+
+      .card-interactive:active {
+        /* transform: scale(0.97); REMOVED CLICK ANIMATION */
+        /* transition-duration: 200ms; */
+      }
+
+      /* --- SCROLL REVEAL SYSTEM WITH FASTER MOTION BLUR --- */
+      .reveal-base {
+        opacity: 0;
+        /* Less distance (30px vs 40px) and slight scale (0.98 vs 0.96) for snappier entry */
+        transform: translate3d(0, 30px, 0) scale(0.98);
+        /* Subtle blur (4px vs 8px) to resolve quickly */
+        filter: blur(4px); 
+        will-change: opacity, transform, filter;
+        /* Shorter duration (0.6s vs 0.8s) keeps it smooth but fast */
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      
+      .reveal-visible {
+        opacity: 1;
+        /* Land cleanly */
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: blur(0px);
+      }
+
+      /* --- VIEW TRANSITIONS --- */
+      ::view-transition-group(root) { animation-duration: 0.7s; }
+    </style>
+
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?external=react,react-dom",
+    "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.20/+esm",
+    "next": "https://esm.sh/next@^16.1.1",
+    "next/": "https://esm.sh/next@^16.1.1/"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-c_bOH2Be.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+</body>
+</html>
