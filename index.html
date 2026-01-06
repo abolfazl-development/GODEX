@@ -78,20 +78,41 @@
       
       html, body {
         width: 100%;
-        min-height: 100%;
+        /* Use Dynamic Viewport Height for mobile address bar stability */
+        min-height: 100dvh;
         margin: 0;
         padding: 0;
+        /* Crucial: prevents native swipe navigations and bounce effects that fight Lenis */
+        overscroll-behavior: none; 
+        /* Optimization: Tells browser we only handle vertical scrolling, optimizing touch response */
+        touch-action: pan-y;
+        background-color: #f8fafc;
         overflow-x: hidden;
-        overscroll-behavior-y: none; /* Prevents rubber-banding that fights Lenis */
       }
 
       body {
         font-family: 'Vazirmatn', sans-serif;
-        background-color: #f8fafc; 
+        /* NO GLOBAL TRANSFORM on body to keep position:fixed working properly */
       }
       
       * {
         box-sizing: border-box;
+      }
+
+      /* Prevent image dragging which causes scroll jank on touch/mouse-drag */
+      img {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+        pointer-events: none; /* Let clicks pass through to parent unless specific */
+      }
+      
+      /* Re-enable pointer events for specific interactive images if needed, 
+         but for cards, we usually want the card to be the click target */
+      .interactive-img {
+        pointer-events: auto;
       }
 
       /* --- LENIS & SCROLLBAR --- */
@@ -106,11 +127,13 @@
       html.dark body { background-color: #020617; }
       
       /* --- OPTIMIZED LAYERS --- */
-      .gpu-layer {
+      /* Helper classes for manual layer promotion */
+      .transform-gpu {
         transform: translate3d(0, 0, 0);
+      }
+      
+      .backface-hidden {
         backface-visibility: hidden;
-        perspective: 1000px;
-        will-change: transform, opacity;
       }
 
       .fixed-layer {
@@ -118,8 +141,22 @@
         inset: 0;
         pointer-events: none;
         z-index: 0;
-        transform: translateZ(0);
+        /* Enforce layer creation for background */
+        transform: translateZ(0); 
       }
+
+      /* --- PERFORMANCE: FAST SCROLL OPTIMIZATION --- */
+      /* When scrolling fast, disable pointer events on main content to avoid expensive hover/hit-testing */
+      body.is-scrolling-fast main {
+        pointer-events: none;
+      }
+      
+      /* Optional: Reduce visual fidelity during fast scroll if needed (e.g. blur) 
+      body.is-scrolling-fast .backdrop-blur-xl {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+      }
+      */
 
       /* --- CENTRALIZED ANIMATION PHYSICS --- */
       /* Defines the standard interactive feel for buttons/links */
@@ -130,18 +167,13 @@
         transform: translateZ(0);
       }
       
-      .physics-interactive:active {
-        /* transform: scale(0.92); REMOVED CLICK ANIMATION */
-        /* transition-duration: 250ms; */
-      }
-
       /* Defines the standard card feel - ULTRA SMOOTH */
       .card-interactive {
         transition-property: transform, box-shadow, background-color, border-color, opacity;
         transition-duration: 1000ms; 
         transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
         transform: translateZ(0);
-        will-change: transform;
+        will-change: transform; /* Hint to browser to prioritize this layer */
         backface-visibility: hidden;
       }
 
@@ -150,20 +182,12 @@
         z-index: 10;
       }
 
-      .card-interactive:active {
-        /* transform: scale(0.97); REMOVED CLICK ANIMATION */
-        /* transition-duration: 200ms; */
-      }
-
       /* --- SCROLL REVEAL SYSTEM WITH FASTER MOTION BLUR --- */
       .reveal-base {
         opacity: 0;
-        /* Less distance (30px vs 40px) and slight scale (0.98 vs 0.96) for snappier entry */
         transform: translate3d(0, 30px, 0) scale(0.98);
-        /* Subtle blur (4px vs 8px) to resolve quickly */
         filter: blur(4px); 
-        will-change: opacity, transform, filter;
-        /* Shorter duration (0.6s vs 0.8s) keeps it smooth but fast */
+        will-change: opacity, transform; /* Removed filter from will-change to save memory */
         transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
                     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
                     filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -171,13 +195,17 @@
       
       .reveal-visible {
         opacity: 1;
-        /* Land cleanly */
         transform: translate3d(0, 0, 0) scale(1);
         filter: blur(0px);
       }
 
       /* --- VIEW TRANSITIONS --- */
-      ::view-transition-group(root) { animation-duration: 0.7s; }
+      ::view-transition-group(root) { animation-duration: 1.2s; }
+      
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        mix-blend-mode: normal;
+      }
     </style>
 
 <link rel="stylesheet" href="/index.css">
@@ -193,11 +221,12 @@
     "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?external=react,react-dom",
     "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.20/+esm",
     "next": "https://esm.sh/next@^16.1.1",
-    "next/": "https://esm.sh/next@^16.1.1/"
+    "next/": "https://esm.sh/next@^16.1.1/",
+    "next-themes": "https://esm.sh/next-themes@0.3.0?external=react,react-dom"
   }
 }
 </script>
-  <script type="module" crossorigin src="/GODEX/assets/index-c_bOH2Be.js"></script>
+  <script type="module" crossorigin src="/GODEX/assets/index-BNx7IsTO.js"></script>
 </head>
   <body>
     <div id="root"></div>
